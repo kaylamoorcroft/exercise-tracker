@@ -61,19 +61,35 @@ async function addExercise(id, description, duration, date_input) {
     "date": date
   });
   await exercise.save();
-  console.log("added new exercise:\n" + exercise);
-  return exercise;
+  // format exercise for JSON response
+  const username = await getUsername(id);
+  const exerciseOutput =  {
+    _id: id,
+    username: username,
+    date: exercise.date.toDateString(),
+    duration: exercise.duration,
+    description: description
+  }
+  console.log("added new exercise:\n" + exerciseOutput);
+  return exerciseOutput;
 }
 
 // get user log from id
 async function getUserLog(id) {
   const username = await getUsername(id);
   const exercises = await Exercise.find({user_id: id}).select("-_id -user_id").exec();
+  const exerciseOutput = exercises.map(exercise => {
+    return {
+      description: exercise.description,
+      duration: exercise.duration,
+      date: exercise.date.toDateString()
+    }
+  });
   const userLog = {
     "_id": id,
     "username": username,
     "count": exercises.length,
-    "log": exercises
+    "log": exerciseOutput
   }
   console.log(userLog);
   return userLog;
@@ -91,16 +107,7 @@ app.route("/api/users")
 // POST request handler for adding an exercise
 app.post("/api/users/:_id/exercises", (req, res) => {
   const { ":_id": id, "description": description, "duration": duration, "date": date } = req.body;
-  addExercise(id, description, duration, date).then(exercise => {
-    // get username from id then return JSON response
-    getUsername(id).then(username => res.json({
-      _id: id,
-      username: username,
-      date: exercise.date.toDateString(),
-      duration: exercise.duration,
-      description: description
-    }));
-  });
+  addExercise(id, description, duration, date).then(exercise => res.json(exercise));
 });
 
 // GET request handler for user log
