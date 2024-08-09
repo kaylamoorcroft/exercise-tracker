@@ -104,8 +104,8 @@ app.route("/api/users")
 
 // POST request handler for adding an exercise
 app.post("/api/users/:_id/exercises", (req, res) => {
-  const { ":_id": id, "description": description, "duration": duration, "date": date } = req.body;
-  addExercise(id, description, duration, date).then(exercise => res.json(exercise));
+  const { "description": description, "duration": duration, "date": date } = req.body;
+  addExercise(req.params._id, description, duration, date).then(exercise => res.json(exercise));
 });
 
 // GET request handler for user log
