@@ -24,7 +24,7 @@ const exerciseSchema = new mongoose.Schema({
   user_id: String,
   description: String,
   duration: Number,
-  date: String
+  date: Date
 }, { versionKey: false });
 
 // models for database objects
@@ -58,7 +58,7 @@ async function addExercise(id, description, duration, date_input) {
     "user_id": id,
     "description": description,
     "duration": duration,
-    "date": date.toDateString()
+    "date": date
   });
   await exercise.save();
   console.log("added new exercise:\n" + exercise);
@@ -96,7 +96,7 @@ app.post("/api/users/:_id/exercises", (req, res) => {
     getUsername(id).then(username => res.json({
       _id: id,
       username: username,
-      date: exercise.date,
+      date: exercise.date.toDateString(),
       duration: exercise.duration,
       description: description
     }));
