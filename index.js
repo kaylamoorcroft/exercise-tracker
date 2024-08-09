@@ -45,6 +45,12 @@ async function getUsername(id) {
   return user.username;
 }
 
+// get all users
+async function getAllUsers() {
+  const users = await User.find({}).exec();
+  return users;
+}
+
 // insert new exercise into database
 async function addExercise(id, description, duration, date) {
   const exercise = new Exercise({
@@ -58,10 +64,26 @@ async function addExercise(id, description, duration, date) {
   return exercise;
 }
 
-// POST request handler for creating a new user
+// get user log from id
+async function getUserLog(id) {
+  const username = await getUsername(id);
+  const exercises = await Exercise.find({user_id: id}).select("-_id -user_id").exec();
+  const userLog = {
+    "_id": id,
+    "username": username,
+    "count": exercises.length,
+    "log": exercises
+  }
+  console.log(userLog);
+}
+
+// POST and GET request handlers for creating a new user
 app.route("/api/users")
   .post((req, res) => {
     createNewUser(req.body.username).then(user => res.json(user));
+  })
+  .get((req, res) => {
+    getAllUsers().then(users => res.json(users));
   });
 
 // POST request handler for adding an exercise
