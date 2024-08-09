@@ -93,11 +93,11 @@ app.post("/api/users/:_id/exercises", (req, res) => {
   addExercise(id, description, duration, date).then(exercise => {
     // get username from id then return JSON response
     getUsername(id).then(username => res.json({
+      _id: id,
       username: username,
-      description: description,
-      duration: exercise.duration,
       date: exercise.date,
-      _id: id
+      duration: exercise.duration,
+      description: description
     }));
   });
 });
