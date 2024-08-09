@@ -39,6 +39,12 @@ async function createNewUser(username) {
   return user;
 }
 
+// get username from user_id
+async function getUsername(id) {
+  const user = await User.findById(id).exec();
+  return user.username;
+}
+
 // insert new exercise into database
 async function addExercise(id, description, duration, date) {
   const exercise = new Exercise({
@@ -52,21 +58,24 @@ async function addExercise(id, description, duration, date) {
   return exercise;
 }
 
-// POST request to create new user
+// POST request handler for creating a new user
 app.route("/api/users")
   .post((req, res) => {
     createNewUser(req.body.username).then(user => res.json(user));
   });
 
+// POST request handler for adding an exercise
 app.post("/api/users/:_id/exercises", (req, res) => {
   const { ":_id": id, "description": description, "duration": duration, "date": date } = req.body;
   addExercise(id, description, duration, date).then(exercise => {
-    res.json({
+    // get username from id then return JSON response
+    getUsername(id).then(username => res.json({
+      username: username,
       description: description,
       duration: exercise.duration,
       date: exercise.date,
       _id: id
-    });
+    }));
   });
 });
 
