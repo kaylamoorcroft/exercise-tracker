@@ -52,12 +52,13 @@ async function getAllUsers() {
 }
 
 // insert new exercise into database
-async function addExercise(id, description, duration, date) {
+async function addExercise(id, description, duration, date_input) {
+  const date = date_input ? new Date(date_input) : new Date();
   const exercise = new Exercise({
     "user_id": id,
     "description": description,
     "duration": duration,
-    "date": (new Date(date)).toDateString()
+    "date": date.toDateString()
   });
   await exercise.save();
   console.log("added new exercise:\n" + exercise);
