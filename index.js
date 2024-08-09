@@ -35,20 +35,18 @@ const Exercise = mongoose.model('Exercise', exerciseSchema, "exercises",  { vers
 async function createNewUser(username) {
   const user = new User({ "username": username });
   await user.save();
-  console.log("created new user:\n" + user);
   return user;
 }
 
 // get username from user_id
 async function getUsername(id) {
   const user = await User.findById(id).exec();
-  return user.username;
+  if (user) return user.username;
 }
 
 // get all users
 async function getAllUsers() {
-  const users = await User.find({}).exec();
-  return users;
+  return await User.find({}).exec();
 }
 
 // insert new exercise into database
@@ -61,23 +59,17 @@ async function addExercise(id, description, duration, date_input) {
     "date": date
   });
   await exercise.save();
-  // format exercise for JSON response
-  const username = await getUsername(id);
-  const exerciseOutput =  {
+  return {
     _id: id,
-    username: username,
+    username: await getUsername(id),
     date: exercise.date.toDateString(),
     duration: exercise.duration,
     description: description
   }
-  console.log("added new exercise:\n" + exerciseOutput);
-  return exerciseOutput;
 }
 
 // get user log from id
 async function getUserLog(id,fromDate, toDate, limit) {
-  const username = await getUsername(id);
-
   let exercisesQuery = Exercise.find({user_id: id}).select("-_id -user_id");
   // optional params
   if (fromDate) exercisesQuery = exercisesQuery.find({ date: { $gte: new Date(fromDate) } });
@@ -93,14 +85,12 @@ async function getUserLog(id,fromDate, toDate, limit) {
     }
   });
 
-  const userLog = {
+  return {
     "_id": id,
-    "username": username,
+    "username": await getUsername(id),
     "count": exercises.length,
     "log": exerciseOutput
   }
-  console.log("User logs\n" + userLog);
-  return userLog;
 }
 
 // POST and GET request handlers for creating a new user
