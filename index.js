@@ -75,9 +75,16 @@ async function addExercise(id, description, duration, date_input) {
 }
 
 // get user log from id
-async function getUserLog(id) {
+async function getUserLog(id,fromDate, toDate, limit) {
   const username = await getUsername(id);
-  const exercises = await Exercise.find({user_id: id}).select("-_id -user_id").exec();
+
+  let exercisesQuery = Exercise.find({user_id: id}).select("-_id -user_id");
+  // optional params
+  if (fromDate) exercisesQuery = exercisesQuery.find({ date: { $gte: new Date(fromDate) } });
+  if (toDate) exercisesQuery = exercisesQuery.find({ date: { $lte: new Date(toDate) } });
+  if (limit) exercisesQuery = exercisesQuery.limit(limit); 
+
+  const exercises = await exercisesQuery.exec();
   const exerciseOutput = exercises.map(exercise => {
     return {
       description: exercise.description,
@@ -85,13 +92,14 @@ async function getUserLog(id) {
       date: exercise.date.toDateString()
     }
   });
+
   const userLog = {
     "_id": id,
     "username": username,
     "count": exercises.length,
     "log": exerciseOutput
   }
-  console.log(userLog);
+  console.log("User logs\n" + userLog);
   return userLog;
 }
 
@@ -112,7 +120,7 @@ app.post("/api/users/:_id/exercises", (req, res) => {
 
 // GET request handler for user log
 app.get("/api/users/:_id/logs", (req, res) => {
-  getUserLog(req.params._id).then(log => res.json(log));
+  getUserLog(req.params._id, req.query.from, req.query.to, req.query.limit).then(log => res.json(log));
 });
 
 const listener = app.listen(process.env.PORT || 3000, () => {
