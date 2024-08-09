@@ -76,6 +76,7 @@ async function getUserLog(id) {
     "log": exercises
   }
   console.log(userLog);
+  return userLog;
 }
 
 // POST and GET request handlers for creating a new user
@@ -100,6 +101,11 @@ app.post("/api/users/:_id/exercises", (req, res) => {
       description: description
     }));
   });
+});
+
+// GET request handler for user log
+app.get("/api/users/:_id/logs", (req, res) => {
+  getUserLog(req.params._id).then(log => res.json(log));
 });
 
 const listener = app.listen(process.env.PORT || 3000, () => {
